@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # Wan 2.2 Video Generator - Next.js Application
+  wan-video-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wan-video-generator
+    restart: unless-stopped
+
+    # Environment variables
+    env_file:
+      - .env  # Contains RUNPOD secrets (gitignored)
+
+    environment:
+      # Application configuration
+      NEXT_PUBLIC_APP_URL: https://video.labfab.ca
+      NEXT_PUBLIC_MAX_TIMEOUT: ${NEXT_PUBLIC_MAX_TIMEOUT:-2500}
+
+      # Node environment
+      NODE_ENV: production
+
+    # Volumes for persistent storage
+    volumes:
+      # Persist generated videos across container restarts
+      - wan-videos:/app/public/videos
+      # Persist SQLite database across container restarts
+      - wan-database:/app/data
+
+    # Network configuration
+    networks:
+      - app-network
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '1'
+          memory: 512M
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Named volumes
+volumes:
+  wan-videos:
+    driver: local
+    name: wan-videos
+
+  wan-database:
+    driver: local
+    name: wan-database
+
+# Networks
+networks:
+  app-network:
+    # Use existing network from your Caddy/OpenWebUI setup
+    external: true
+    name: ollama-proxy-network
