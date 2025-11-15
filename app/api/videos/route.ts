@@ -24,11 +24,20 @@ export async function POST(request: NextRequest) {
     const videoFileName = `${jobId}.mp4`;
     const videoPath = path.join(process.cwd(), "public", "videos", videoFileName);
 
+    console.log("Saving video:", {
+      jobId,
+      videoPath,
+      bufferSize: videoBuffer.length,
+      base64Length: base64Data.length
+    });
+
     // Save video file
     await writeFile(videoPath, videoBuffer);
 
-    // Return public URL path
-    const publicVideoPath = `/videos/${videoFileName}`;
+    console.log("Video saved successfully:", videoPath);
+
+    // Return API URL path (not direct /videos path, use API route for serving)
+    const publicVideoPath = `/api/videos/${videoFileName}`;
 
     return NextResponse.json({
       videoPath: publicVideoPath,

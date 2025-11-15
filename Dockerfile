@@ -46,6 +46,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Copy public folder (including videos directory)
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Create videos directory for runtime-generated videos (will be mounted as volume)
+RUN mkdir -p /app/public/videos && chown nextjs:nodejs /app/public/videos
+
 # Copy node_modules for better-sqlite3 native bindings
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
