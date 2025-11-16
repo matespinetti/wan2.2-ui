@@ -30,6 +30,15 @@ CREATE TABLE IF NOT EXISTS generations (
 
 CREATE INDEX IF NOT EXISTS idx_status ON generations(status);
 CREATE INDEX IF NOT EXISTS idx_created_at ON generations(created_at DESC);
+
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_username ON users(username);
 `;
 
 class GenerationDatabase {
@@ -206,6 +215,40 @@ class GenerationDatabase {
     this.db.close();
   }
 
+  // User Management Methods
+
+  // Create a new user
+  createUser(id: string, username: string, passwordHash: string): void {
+    const stmt = this.db.prepare(`
+      INSERT INTO users (id, username, password_hash, created_at)
+      VALUES (?, ?, ?, ?)
+    `);
+    stmt.run(id, username, passwordHash, Date.now());
+  }
+
+  // Get user by username
+  getUserByUsername(username: string): { id: string; username: string; password_hash: string; created_at: number } | null {
+    const stmt = this.db.prepare(`
+      SELECT * FROM users WHERE username = ?
+    `);
+    return stmt.get(username) as any;
+  }
+
+  // Get user by ID
+  getUserById(id: string): { id: string; username: string; password_hash: string; created_at: number } | null {
+    const stmt = this.db.prepare(`
+      SELECT * FROM users WHERE id = ?
+    `);
+    return stmt.get(id) as any;
+  }
+
+  // Check if any users exist (for initial setup)
+  hasUsers(): boolean {
+    const stmt = this.db.prepare("SELECT COUNT(*) as count FROM users");
+    const result = stmt.get() as { count: number };
+    return result.count > 0;
+  }
+
   // Helper: Convert database row to GenerationHistoryItem
   private rowToHistoryItem(row: any): GenerationHistoryItem {
     return {
@@ -249,4 +292,10 @@ export const db = {
     getDatabase().filterByDateRange(startDate, endDate),
   isHealthy: () => getDatabase().isHealthy(),
   close: () => getDatabase().close(),
+  // User methods
+  createUser: (id: string, username: string, passwordHash: string) =>
+    getDatabase().createUser(id, username, passwordHash),
+  getUserByUsername: (username: string) => getDatabase().getUserByUsername(username),
+  getUserById: (id: string) => getDatabase().getUserById(id),
+  hasUsers: () => getDatabase().hasUsers(),
 };

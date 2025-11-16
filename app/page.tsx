@@ -48,25 +48,52 @@ export default function Home() {
     },
   });
 
-  // Restore active generation on mount (after page refresh)
+  // Restore and reconcile state on mount (after page refresh)
   useEffect(() => {
-    const restoreActiveGeneration = async () => {
-      // Skip if already have active generation in persisted state
-      if (currentGeneration && (currentGeneration.status === "queued" || currentGeneration.status === "processing")) {
-        return;
-      }
-
-      // Check database for any active generations
+    const reconcileState = async () => {
       try {
+        // Always fetch from database (source of truth)
         const response = await fetch("/api/history");
-        if (response.ok) {
-          const { history } = await response.json();
+        if (!response.ok) return;
+
+        const { history } = await response.json();
+
+        // Check if we have a persisted currentGeneration
+        if (currentGeneration) {
+          // Look up the generation in database to get the latest status
+          const dbGeneration = history.find((item: any) => item.id === currentGeneration.id);
+
+          if (dbGeneration) {
+            // Database has this generation - reconcile state
+            if (dbGeneration.status === "completed" || dbGeneration.status === "failed" || dbGeneration.status === "cancelled") {
+              // Generation finished in database but persisted state says it's generating
+              // Clear the generating flag and update with DB state
+              useGenerationStore.setState({
+                currentGeneration: dbGeneration,
+                isGenerating: false,
+              });
+            } else if (dbGeneration.status === "queued" || dbGeneration.status === "processing") {
+              // Still active - ensure we're polling by setting isGenerating
+              useGenerationStore.setState({
+                currentGeneration: dbGeneration,
+                isGenerating: true,
+              });
+            }
+          } else {
+            // Generation not found in database - clear persisted state
+            useGenerationStore.setState({
+              currentGeneration: null,
+              isGenerating: false,
+            });
+          }
+        } else {
+          // No persisted state - check if there's an active generation in DB
           const activeGeneration = history.find(
             (item: any) => item.status === "queued" || item.status === "processing"
           );
 
-          if (activeGeneration && !currentGeneration) {
-            // Restore the active generation to state to resume polling
+          if (activeGeneration) {
+            // Found an active generation - restore it
             useGenerationStore.setState({
               currentGeneration: activeGeneration,
               isGenerating: true,
@@ -74,11 +101,11 @@ export default function Home() {
           }
         }
       } catch (error) {
-        console.error("Error restoring active generation:", error);
+        console.error("Error reconciling state:", error);
       }
     };
 
-    restoreActiveGeneration();
+    reconcileState();
   }, []); // Run once on mount
 
   // Poll for status updates
