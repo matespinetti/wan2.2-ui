@@ -52,6 +52,12 @@ RUN mkdir -p /app/public/videos && chown nextjs:nodejs /app/public/videos
 # Copy node_modules for better-sqlite3 native bindings
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
+# Copy scripts directory for CLI tools (e.g., create-user)
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
+# Copy package.json for running npm scripts
+COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
+
 # Switch to non-root user
 USER nextjs
 
