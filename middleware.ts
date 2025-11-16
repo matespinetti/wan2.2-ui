@@ -22,9 +22,10 @@ export const config = {
      * Match all request paths except:
      * - /auth/signin (sign in page)
      * - /api/auth/* (NextAuth API routes)
+     * - /api/health (Docker health check)
      * - /_next/* (Next.js internals)
      * - /favicon.ico, /robots.txt (static files)
      */
-    "/((?!auth/signin|api/auth|_next|favicon.ico|robots.txt).*)",
+    "/((?!auth/signin|api/auth|api/health|_next|favicon.ico|robots.txt).*)",
   ],
 };
