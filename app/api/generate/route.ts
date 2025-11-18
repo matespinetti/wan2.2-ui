@@ -50,14 +50,10 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to estimate generation time
+// Helper function to estimate generation time for I2V
 function calculateEstimatedTime(params: any): number {
-  // Base time in seconds
+  // Base time in seconds (I2V typically similar to T2V)
   let estimate = 30;
-
-  // Add time based on resolution
-  if (params.resolution === "1080p") estimate += 60;
-  else if (params.resolution === "720p") estimate += 30;
 
   // Add time based on inference steps
   estimate += (params.num_inference_steps - 20) * 2;

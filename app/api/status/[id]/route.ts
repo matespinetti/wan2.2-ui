@@ -30,6 +30,10 @@ export async function GET(
     // If video is completed and we have base64 data, save it
     if (status === "completed" && response.output?.video_base64) {
       try {
+        // Get generation record to retrieve original image for thumbnail
+        const generation = db.getGeneration(id);
+        const imageBase64 = generation?.params?.image;
+
         // Save video file via internal API call
         const saveResponse = await fetch(
           `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/videos`,
@@ -39,17 +43,19 @@ export async function GET(
             body: JSON.stringify({
               jobId: id,
               videoBase64: response.output.video_base64,
+              imageBase64, // Pass original image for thumbnail generation
             }),
           }
         );
 
         if (saveResponse.ok) {
-          const { videoPath } = await saveResponse.json();
+          const { videoPath, thumbnailPath } = await saveResponse.json();
           videoUrl = videoPath;
 
-          // Update database with video path
+          // Update database with video path and thumbnail path
           db.updateGeneration(id, {
             videoUrl: videoPath,
+            thumbnailUrl: thumbnailPath || undefined,
             status: "completed",
             progress: 100,
             completedAt: Date.now(),

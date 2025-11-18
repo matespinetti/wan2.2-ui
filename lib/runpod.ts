@@ -1,5 +1,4 @@
 import { GenerationParams, GenerationStatus } from "./validations";
-import { RESOLUTIONS } from "./validations";
 
 export interface RunPodGenerateResponse {
   id: string;
@@ -48,20 +47,15 @@ class RunPodClient {
 
   async generateVideo(params: GenerationParams): Promise<RunPodGenerateResponse> {
     try {
-      const resolution = RESOLUTIONS.find((r) => r.value === params.resolution);
-      if (!resolution) {
-        throw new Error("Invalid resolution");
-      }
+      // Remove data URL prefix from image (e.g., "data:image/jpeg;base64,")
+      const base64Image = params.image.replace(/^data:image\/\w+;base64,/, "");
 
       const payload = {
         input: {
-          prompt: params.prompt,
-          resolution: params.resolution,
-          width: resolution.width,
-          height: resolution.height,
+          image: base64Image,
+          ...(params.prompt && { prompt: params.prompt }),
           num_inference_steps: params.num_inference_steps,
           guidance_scale: params.guidance_scale,
-          guidance_scale_2: params.guidance_scale_2,
           num_frames: params.num_frames,
           fps: params.fps,
           ...(params.seed !== undefined && { seed: params.seed }),

@@ -34,13 +34,18 @@ export function HistoryCard({ item, onDelete, onView }: HistoryCardProps) {
   return (
     <Card className="overflow-hidden">
       <CardHeader className="p-0">
-        <div className="aspect-video w-full bg-muted flex items-center justify-center">
-          {item.status === "completed" && item.videoUrl ? (
+        <div className="aspect-video w-full bg-muted flex items-center justify-center overflow-hidden">
+          {item.status === "completed" && item.thumbnailUrl ? (
+            <img
+              src={item.thumbnailUrl}
+              alt={item.prompt || "Generated video thumbnail"}
+              className="h-full w-full object-cover"
+            />
+          ) : item.status === "completed" && item.videoUrl ? (
             <video
               src={item.videoUrl}
               className="h-full w-full object-cover"
               muted
-              loop
             />
           ) : (
             <Play className="h-12 w-12 text-muted-foreground" />

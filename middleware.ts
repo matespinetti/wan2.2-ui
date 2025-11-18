@@ -23,9 +23,10 @@ export const config = {
      * - /auth/signin (sign in page)
      * - /api/auth/* (NextAuth API routes)
      * - /api/health (Docker health check)
+     * - /api/videos/* (video storage/serving - internal use)
      * - /_next/* (Next.js internals)
      * - /favicon.ico, /robots.txt (static files)
      */
-    "/((?!auth/signin|api/auth|api/health|_next|favicon.ico|robots.txt).*)",
+    "/((?!auth/signin|api/auth|api/health|api/videos|_next|favicon.ico|robots.txt).*)",
   ],
 };

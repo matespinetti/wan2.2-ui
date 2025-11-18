@@ -6,7 +6,7 @@ import { Download, RotateCcw } from "lucide-react";
 
 interface VideoPlayerProps {
   videoUrl: string;
-  prompt: string;
+  prompt?: string;
   onRegenerate?: () => void;
 }
 
@@ -37,10 +37,12 @@ export function VideoPlayer({ videoUrl, prompt, onRegenerate }: VideoPlayerProps
             Your browser does not support the video tag.
           </video>
         </div>
-        <div className="space-y-1">
-          <p className="text-sm font-medium">Prompt:</p>
-          <p className="text-sm text-muted-foreground">{prompt}</p>
-        </div>
+        {prompt && (
+          <div className="space-y-1">
+            <p className="text-sm font-medium">Prompt:</p>
+            <p className="text-sm text-muted-foreground">{prompt}</p>
+          </div>
+        )}
       </CardContent>
       <CardFooter className="flex gap-2">
         <Button onClick={handleDownload} className="flex-1">

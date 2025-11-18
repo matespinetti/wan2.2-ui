@@ -4,17 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DEFAULT_PRESETS, Preset, GenerationParams } from "@/lib/validations";
 import { useGenerationStore } from "@/lib/store";
-import { Sparkles, Zap, Crown, Pencil } from "lucide-react";
+import { Sparkles, Zap, Crown, Wind } from "lucide-react";
 
 interface PresetSelectorProps {
-  onSelect: (params: Partial<GenerationParams>) => void;
+  onSelect: (params: Partial<Omit<GenerationParams, "image">>) => void;
 }
 
 const PRESET_ICONS = {
-  draft: Zap,
+  quick: Zap,
   balanced: Sparkles,
   "high-quality": Crown,
-  sketch: Pencil,
+  "smooth-motion": Wind,
 };
 
 export function PresetSelector({ onSelect }: PresetSelectorProps) {

@@ -17,7 +17,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { RESOLUTIONS, GenerationParams } from "@/lib/validations";
+import { HelpCircle } from "lucide-react";
 
 interface ParameterPanelProps {
   register: UseFormRegister<GenerationParams>;
@@ -29,19 +36,29 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
   const resolution = watch("resolution");
   const numInferenceSteps = watch("num_inference_steps");
   const guidanceScale = watch("guidance_scale");
-  const guidanceScale2 = watch("guidance_scale_2");
   const numFrames = watch("num_frames");
   const fps = watch("fps");
 
   return (
-    <Accordion type="single" collapsible defaultValue="parameters" className="w-full">
-      <AccordionItem value="parameters">
-        <AccordionTrigger>Generation Parameters</AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-6 pt-4">
+    <TooltipProvider>
+      <Accordion type="single" collapsible defaultValue="parameters" className="w-full">
+        <AccordionItem value="parameters">
+          <AccordionTrigger>Generation Parameters</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-6 pt-4">
             {/* Resolution */}
             <div className="space-y-2">
-              <Label htmlFor="resolution">Resolution</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="resolution">Resolution</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Reference only - the actual resolution is automatically calculated from your uploaded image dimensions</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Select
                 value={resolution}
                 onValueChange={(value) => setValue("resolution", value)}
@@ -57,12 +74,25 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
                   ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                For reference - actual resolution calculated from image
+              </p>
             </div>
 
             {/* Inference Steps */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="num_inference_steps">Inference Steps</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="num_inference_steps">Inference Steps</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Number of denoising steps - higher values produce better quality but take longer to generate</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <span className="text-sm text-muted-foreground">
                   {numInferenceSteps}
                 </span>
@@ -83,7 +113,17 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
             {/* Guidance Scale */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="guidance_scale">Guidance Scale</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="guidance_scale">Guidance Scale</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Controls how closely the video follows your prompt - higher values mean stronger adherence to the text description</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <span className="text-sm text-muted-foreground">
                   {guidanceScale.toFixed(1)}
                 </span>
@@ -97,35 +137,24 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
                 onValueChange={([value]) => setValue("guidance_scale", value)}
               />
               <p className="text-xs text-muted-foreground">
-                Controls how closely the video follows the prompt
-              </p>
-            </div>
-
-            {/* Guidance Scale 2 */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="guidance_scale_2">Guidance Scale 2</Label>
-                <span className="text-sm text-muted-foreground">
-                  {guidanceScale2.toFixed(1)}
-                </span>
-              </div>
-              <Slider
-                id="guidance_scale_2"
-                min={1}
-                max={20}
-                step={0.5}
-                value={[guidanceScale2]}
-                onValueChange={([value]) => setValue("guidance_scale_2", value)}
-              />
-              <p className="text-xs text-muted-foreground">
-                Secondary guidance parameter for fine-tuning
+                How closely the video follows the prompt (higher = more influence)
               </p>
             </div>
 
             {/* Number of Frames */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="num_frames">Number of Frames</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="num_frames">Number of Frames</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Total number of frames in the output video - more frames create a longer duration video</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <span className="text-sm text-muted-foreground">{numFrames}</span>
               </div>
               <Slider
@@ -144,7 +173,17 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
             {/* FPS */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="fps">Frames Per Second (FPS)</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="fps">Frames Per Second (FPS)</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p className="max-w-xs">Playback speed of the video - higher FPS creates smoother, faster motion</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
                 <span className="text-sm text-muted-foreground">{fps}</span>
               </div>
               <Slider
@@ -162,7 +201,17 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
 
             {/* Seed (Optional) */}
             <div className="space-y-2">
-              <Label htmlFor="seed">Seed (Optional)</Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="seed">Seed (Optional)</Label>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Random seed for reproducible results - use the same seed with identical settings to generate similar videos</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
               <Input
                 id="seed"
                 type="number"
@@ -179,5 +228,6 @@ export function ParameterPanel({ register, watch, setValue }: ParameterPanelProp
         </AccordionContent>
       </AccordionItem>
     </Accordion>
+    </TooltipProvider>
   );
 }

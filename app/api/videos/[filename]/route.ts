@@ -15,33 +15,39 @@ export async function GET(
       return NextResponse.json({ error: "Invalid filename" }, { status: 400 });
     }
 
-    // Only allow .mp4 files
-    if (!filename.endsWith(".mp4")) {
+    // Only allow .mp4 and .jpg files
+    const isVideo = filename.endsWith(".mp4");
+    const isThumbnail = filename.endsWith(".jpg") || filename.endsWith(".jpeg");
+
+    if (!isVideo && !isThumbnail) {
       return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
     }
 
-    const videoPath = path.join(process.cwd(), "public", "videos", filename);
+    const filePath = path.join(process.cwd(), "public", "videos", filename);
 
-    console.log("Serving video from:", videoPath);
+    console.log("Serving file from:", filePath);
 
     // Check if file exists
     try {
-      const fileStat = await stat(videoPath);
-      console.log("Video file size:", fileStat.size, "bytes");
+      const fileStat = await stat(filePath);
+      console.log("File size:", fileStat.size, "bytes");
     } catch (statError) {
-      console.error("Video file not found:", videoPath);
-      return NextResponse.json({ error: "Video not found" }, { status: 404 });
+      console.error("File not found:", filePath);
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    // Read the video file
-    const videoBuffer = await readFile(videoPath);
+    // Read the file
+    const fileBuffer = await readFile(filePath);
 
-    // Return video with proper headers
-    return new NextResponse(videoBuffer, {
+    // Determine content type
+    const contentType = isVideo ? "video/mp4" : "image/jpeg";
+
+    // Return file with proper headers
+    return new NextResponse(fileBuffer, {
       headers: {
-        "Content-Type": "video/mp4",
-        "Content-Length": videoBuffer.length.toString(),
-        "Accept-Ranges": "bytes",
+        "Content-Type": contentType,
+        "Content-Length": fileBuffer.length.toString(),
+        ...(isVideo && { "Accept-Ranges": "bytes" }),
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });

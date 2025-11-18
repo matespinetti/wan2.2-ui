@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageUpload } from "@/components/image-upload";
 import { PromptInput } from "@/components/prompt-input";
 import { ParameterPanel } from "@/components/parameter-panel";
 import { PresetSelector } from "@/components/preset-selector";
@@ -38,12 +39,12 @@ export default function Home() {
   } = useForm<GenerationParams>({
     resolver: zodResolver(generationParamsSchema),
     defaultValues: {
+      image: "",
       prompt: "",
       resolution: "720p",
-      num_inference_steps: 30,
-      guidance_scale: 7.5,
-      guidance_scale_2: 7.5,
-      num_frames: 49,
+      num_inference_steps: 40,
+      guidance_scale: 3.5,
+      num_frames: 81,
       fps: 16,
     },
   });
@@ -218,7 +219,7 @@ export default function Home() {
       {/* Header */}
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Wan 2.2 Video Generator</h1>
+          <h1 className="text-2xl font-bold">Wan 2.2 Image-to-Video</h1>
           <Link href="/history">
             <Button variant="outline">
               <History className="mr-2 h-4 w-4" />
@@ -239,6 +240,12 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                  <ImageUpload
+                    value={watch("image")}
+                    onChange={(base64) => setValue("image", base64 || "")}
+                    error={errors.image}
+                  />
+
                   <PromptInput
                     register={register}
                     error={errors.prompt}
@@ -256,9 +263,9 @@ export default function Home() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={isGenerating}
+                    disabled={isGenerating || !watch("image")}
                   >
-                    {isGenerating ? "Generating..." : "Generate Video"}
+                    {isGenerating ? "Generating..." : "Generate Video from Image"}
                   </Button>
                 </form>
               </CardContent>
@@ -282,7 +289,7 @@ export default function Home() {
                 <CardContent className="flex items-center justify-center py-12">
                   <div className="text-center">
                     <p className="text-muted-foreground">
-                      Your generated video will appear here
+                      Upload an image to generate a video
                     </p>
                   </div>
                 </CardContent>

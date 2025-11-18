@@ -16,7 +16,7 @@ export function HistoryGrid({ items, onDelete, onView }: HistoryGridProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredItems = items.filter((item) =>
-    item.prompt.toLowerCase().includes(searchQuery.toLowerCase())
+    item.prompt?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (items.length === 0) {
